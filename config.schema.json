@@ -1,0 +1,91 @@
+{
+  "pluginAlias": "NatureRemoMultiToggleLight",
+  "pluginType": "accessory",
+  "headerDisplay": "IMPORTANT: The light must be added to Nature Remo as \"Other\" appliance. Native \"Light\" appliance is not supported.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Appliance Name",
+        "description": "Name of the light appliance. Must match the name in Nature Remo app.",
+        "type": "string",
+        "required": true,
+        "default": "Light"
+      },
+      "buttonName": {
+        "title": "Button Name",
+        "description": "Name of the light toggle button. Must match the name in Nature Remo app.",
+        "type": "string",
+        "required": true,
+        "default": "on"
+      },
+      "onToggleCount": {
+        "title": "ON Toggle Count",
+        "description": "Number of times to toggle the light switch to turn from OFF to ON",
+        "type": "integer",
+        "required": true,
+        "default": 1,
+        "minimum": 1
+      },
+      "offToggleCount": {
+        "title": "OFF Toggle Count",
+        "description": "Number of times to toggle the light switch to turn ON to OFF",
+        "type": "integer",
+        "required": true,
+        "default": 1,
+        "minimum": 1
+      },
+      "accessToken": {
+        "title": "Nature Remo Access Token",
+        "type": "string",
+        "required": true,
+        "description": "Get it from https://home.nature.global/",
+        "pattern": ""
+      },
+      "signalDelay": {
+        "title": "Delay between each toggle request to Nature Remo API (ms)",
+        "type": "integer",
+        "required": true,
+        "default": 100,
+        "minimum": 0
+      },
+      "enableDummySettings": {
+        "title": "Enable dummy settings",
+        "description": "EXPERIMENTAL: Enable brightness, color temperature, hue, and saturation settings. Does not actually send any signal to the light.",
+        "type": "boolean",
+        "required": true,
+        "default": false
+      },
+      "apiEndpoint": {
+        "title": "Nature Remo Cloud API Endpoint",
+        "type": "string",
+        "required": true,
+        "default": "https://api.nature.global/"
+      }
+    }
+  },
+  "form": [
+    "name",
+    "buttonName",
+    "accessToken",
+    {
+      "type": "fieldset",
+      "expandable": true,
+      "title": "Counter",
+      "items": [
+        "onToggleCount",
+        "offToggleCount"
+      ]
+    },
+    {
+      "type": "fieldset",
+      "expandable": true,
+      "title": "Advance",
+      "items": [
+        "signalDelay",
+        "apiEndpoint",
+        "enableDummySettings"
+      ]
+    }
+  ]
+}
