@@ -1,4 +1,4 @@
-# homebridge-nature-remo-multi-toggle-light
+# Homebridge Nature Remo Multi Toggle Light
 
 This plugin enables Homebridge to control toggle light through [Nature Remo](https://en.nature.global/) IR blaster.
 
