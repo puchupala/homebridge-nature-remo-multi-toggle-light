@@ -43,14 +43,15 @@
         "pattern": ""
       },
       "signalDelay": {
-        "title": "Delay between each toggle request to Nature Remo API (ms)",
+        "title": "Toggle Delay",
+        "description": "Delay between each toggle request to Nature Remo API (in milliseconds)",
         "type": "integer",
         "required": true,
         "default": 100,
         "minimum": 0
       },
       "enableDummySettings": {
-        "title": "Enable dummy settings",
+        "title": "Enable Dummy Settings",
         "description": "EXPERIMENTAL: Enable brightness, color temperature, hue, and saturation settings. Does not actually send any signal to the light.",
         "type": "boolean",
         "required": true,
@@ -58,6 +59,7 @@
       },
       "apiEndpoint": {
         "title": "Nature Remo Cloud API Endpoint",
+        "description": "Default: https://api.nature.global/",
         "type": "string",
         "required": true,
         "default": "https://api.nature.global/"

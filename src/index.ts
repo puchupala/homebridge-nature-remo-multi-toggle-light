@@ -1,4 +1,5 @@
 const NodePersist = require("node-persist");
+import waitUntil from "async-wait-until";
 import Axios, { AxiosInstance } from "axios"
 import {
   AccessoryConfig,
@@ -29,6 +30,7 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
   readonly #lightbulbService: Service;
   readonly #instancePromise: Promise<void>;
 
+  #transition: boolean = false;
   #signalId: string = "";
   #state: CharacteristicValue = false;
   #brightness: CharacteristicValue = 100;
@@ -120,15 +122,11 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
     const sleep = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
-    var chain = callable();
+    await callable();
     for (let i = 0; i < n - 1; i++) {
-      chain = chain.then(async () => {
         await sleep(this.#config.signalDelay);
-      }).then(async () => {
         await callable();
-      });
     }
-    await chain;
   }
 
   /*
@@ -143,7 +141,8 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
 
   async getOnHandler(): Promise<CharacteristicValue> {
     await this.#instancePromise;
-    this.#log.info(`Getting ${this.#config.name} state: ${this.#state}`);
+    this.#log.info(`Getting ${this.#config.name} state`);
+    await waitUntil(() => !this.#transition);
     return this.#state;
   }
 
@@ -151,64 +150,73 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
     await this.#instancePromise;
     this.#log.info(`Setting ${this.#config.name} state to: ${value}`);
 
+    await waitUntil(() => !this.#transition);
+
     // Already correct state, do nothing
     if (this.#state == value) { return; }
 
+    this.#transition = true;
     let toggleCount: number = this.#state ? this.#config.offToggleCount : this.#config.onToggleCount;
-    const toggleClosure = () =>
-      new Promise<void>((resolve) => this._requestToggle().then(() => resolve()));
-    await this._repeat(toggleCount, toggleClosure)
-      .then(async () => {
-        this.#state = value;
-        await NodePersist.setItem(this.#config.name, value);
-      });
+    const toggleClosure = async () => await this._requestToggle();
+    await this._repeat(toggleCount, toggleClosure);
+    this.#state = value;
+    await NodePersist.setItem(this.#config.name, value);
+    this.#transition = false;
   }
 
   async getBrightnessHandler(): Promise<CharacteristicValue> {
     await this.#instancePromise;
-    this.#log.info(`Getting ${this.#config.name} state: ${this.#brightness}`);
+    this.#log.info(`Getting ${this.#config.name} state`);
+    await waitUntil(() => !this.#transition);
     return this.#brightness;
   }
 
   async setBrightnessHandler(value: CharacteristicValue): Promise<void> {
     await this.#instancePromise;
     this.#log.info(`Setting ${this.#config.name} brightness to: ${value}`);
+    await waitUntil(() => !this.#transition);
     this.#brightness = value;
   }
 
   async getColorTemperatureHandler(): Promise<CharacteristicValue> {
     await this.#instancePromise;
-    this.#log.info(`Getting ${this.#config.name} color temperature: ${this.#colorTemperature}`);
+    this.#log.info(`Getting ${this.#config.name} color temperature`);
+    await waitUntil(() => !this.#transition);
     return this.#colorTemperature;
   }
 
   async setColorTemperatureHandler(value: CharacteristicValue): Promise<void> {
     await this.#instancePromise;
     this.#log.info(`Setting ${this.#config.name} color temperature to: ${value}`);
+    await waitUntil(() => !this.#transition);
     this.#colorTemperature = value;
   }
 
   async getHueHandler(): Promise<CharacteristicValue> {
     await this.#instancePromise;
-    this.#log.info(`Getting ${this.#config.name} hue: ${this.#hue}`);
+    this.#log.info(`Getting ${this.#config.name} hue`);
+    await waitUntil(() => !this.#transition);
     return this.#hue;
   }
 
   async setHueHandler(value: CharacteristicValue): Promise<void> {
     await this.#instancePromise;
     this.#log.info(`Setting ${this.#config.name} hue to: ${value}`);
+    await waitUntil(() => !this.#transition);
     this.#hue = value;
   }
 
   async getSaturationHandler(): Promise<CharacteristicValue> {
     await this.#instancePromise;
-    this.#log.info(`Getting ${this.#config.name} saturation: ${this.#saturation}`);
+    this.#log.info(`Getting ${this.#config.name} saturation`);
+    await waitUntil(() => !this.#transition);
     return this.#saturation;
   }
 
   async setSaturationHandler(value: CharacteristicValue): Promise<void> {
     await this.#instancePromise;
     this.#log.info(`Setting ${this.#config.name} saturation to: ${value}`);
+    await waitUntil(() => !this.#transition);
     this.#saturation = value;
   }
 
