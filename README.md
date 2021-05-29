@@ -6,9 +6,9 @@ Many ceiling lights in Japan use a single button to toggle between multiple stat
 This plugin keep track of the light state so that it could be controlled by Homebridge. In other words, multiple ON-ON or OFF-OFF trigger in a row wouldn't confuse the light.
 
 The state of the light is kept inside Homebridge so if you control the light outside of Homebridge (e.g. physical remote, Nature Remo app), it will be out-of-sync.
-To avoid the issue, please connect all of your assistants (e.g. Google Assistant, Alexa) to Homebridge instead of using native Nature Remo app.
+To avoid the issue, please connect all of your assistants (e.g. Google Assistant, Alexa) to Homebridge instead of using the native Nature Remo app.
 
-I tested the plugin with Nature Remo 3 but it should supports any model so long as they use the same [Nature Remo Cloud API](https://developer.nature.global/en/overview).
+I tested the plugin with Nature Remo 3 but it should support any model so long as they use the same [Nature Remo Cloud API](https://developer.nature.global/en/overview).
 
 ## Features
 
