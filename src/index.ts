@@ -1,6 +1,6 @@
-const NodePersist = require("node-persist");
-import waitUntil from "async-wait-until";
-import Axios, { AxiosInstance } from "axios"
+import NodePersist from 'node-persist';
+import waitUntil from 'async-wait-until';
+import Axios, { AxiosInstance } from 'axios';
 import {
   AccessoryConfig,
   AccessoryPlugin,
@@ -8,8 +8,8 @@ import {
   CharacteristicValue,
   HAP,
   Logging,
-  Service
-} from "homebridge";
+  Service,
+} from 'homebridge';
 
 let hap: HAP;
 
@@ -18,7 +18,7 @@ let hap: HAP;
  */
 export = (api: API) => {
   hap = api.hap;
-  api.registerAccessory("NatureRemoMultiToggleLight", NatureRemoMultiToggleLightAccessory);
+  api.registerAccessory('NatureRemoMultiToggleLight', NatureRemoMultiToggleLightAccessory);
 };
 
 class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
@@ -30,8 +30,8 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
   readonly #lightbulbService: Service;
   readonly #instancePromise: Promise<void>;
 
-  #transition: boolean = false;
-  #signalId: string = "";
+  #transition = false;
+  #signalId = '';
   #state: CharacteristicValue = false;
   #brightness: CharacteristicValue = 100;
   #colorTemperature: CharacteristicValue = 500;
@@ -44,31 +44,31 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
     this.#api = api;
 
     this.#natureRemoApi = Axios.create({
-      baseURL: `${config.apiEndpoint.replace(/^(.+?)\/*?$/, "$1")}/1`, // Strip trailing slash then append /1
-      headers: {Authorization: `Bearer ${config.accessToken}`}
+      baseURL: `${config.apiEndpoint.replace(/^(.+?)\/*?$/, '$1')}/1`, // Strip trailing slash then append /1
+      headers: {Authorization: `Bearer ${config.accessToken}`},
     });
 
-    this.#lightbulbService = new api.hap.Service.Lightbulb(config.name);
+    this.#lightbulbService = new hap.Service.Lightbulb(config.name);
     this.#lightbulbService
-      .getCharacteristic(api.hap.Characteristic.On)
+      .getCharacteristic(hap.Characteristic.On)
       .onGet(this.getOnHandler.bind(this))
       .onSet(this.setOnHandler.bind(this));
 
     if (config.enableDummySettings) {
       this.#lightbulbService
-        .getCharacteristic(api.hap.Characteristic.Brightness)
+        .getCharacteristic(hap.Characteristic.Brightness)
         .onGet(this.getBrightnessHandler.bind(this))
         .onSet(this.setBrightnessHandler.bind(this));
       this.#lightbulbService
-        .getCharacteristic(api.hap.Characteristic.ColorTemperature)
+        .getCharacteristic(hap.Characteristic.ColorTemperature)
         .onGet(this.getColorTemperatureHandler.bind(this))
         .onSet(this.setColorTemperatureHandler.bind(this));
       this.#lightbulbService
-        .getCharacteristic(api.hap.Characteristic.Hue)
+        .getCharacteristic(hap.Characteristic.Hue)
         .onGet(this.getHueHandler.bind(this))
         .onSet(this.setHueHandler.bind(this));
       this.#lightbulbService
-        .getCharacteristic(api.hap.Characteristic.Saturation)
+        .getCharacteristic(hap.Characteristic.Saturation)
         .onGet(this.getSaturationHandler.bind(this))
         .onSet(this.setSaturationHandler.bind(this));
     }
@@ -78,54 +78,68 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
 
   private async _initialize() {
     await NodePersist.init({dir: this.#api.user.persistPath(), forgiveParseErrors: true});
-    let cachedState = await NodePersist.getItem(this.#config.name);
+    const cachedState = await NodePersist.getItem(this.#config.name);
     if (cachedState !== undefined) {
       this.#state = cachedState;
     }
 
+    interface Signal {
+      name: string;
+      id: string;
+    }
+    interface Appliance {
+      nickname: string;
+      signals: Array<Signal>;
+    }
+
     try {
-      let response = await this.#natureRemoApi.get(`/appliances`);
-      let appliance = response.data.find(
-        (appliance: any) => appliance.nickname.trim() == this.#config.name.trim());
-      if (appliance === undefined) throw `Could not find appliance: ${this.#config.name}`;
-      let signal = appliance.signals.find(
-        (signal: any) => signal.name.trim() == this.#config.buttonName.trim());
-      if (signal === undefined) throw `Could not find button: ${this.#config.buttonName}`;
+      const response = await this.#natureRemoApi.get('/appliances');
+      const appliance = response.data.find(
+        (appliance: Appliance) => appliance.nickname.trim() === this.#config.name.trim());
+      if (appliance === undefined) {
+        throw `Could not find appliance: ${this.#config.name}`;
+      }
+      const signal = appliance.signals.find(
+        (signal: Signal) => signal.name.trim() === this.#config.buttonName.trim());
+      if (signal === undefined) {
+        throw `Could not find button: ${this.#config.buttonName}`;
+      }
       this.#signalId = signal.id;
-      this.#log.info(`${this.#config.name}'s signal id: ${signal.id}`)
+      this.#log.info(`${this.#config.name}'s signal id: ${signal.id}`);
     } catch (err) {
-      this.#log.error("Error getting signal id: ", err);
+      this.#log.error('Error getting signal id: ', err);
     }
   }
 
   /**
    * @todo Keep retry if error
-   * @returns 
    */
   private async _requestToggle() {
     await this.#instancePromise;
 
     return this.#natureRemoApi.post(`/signals/${this.#signalId}/send`)
-      .catch((err: Error) => this.#log.error("Error sending toggle signal: ", err));
+      .catch((err: Error) => this.#log.error('Error sending toggle signal: ', err));
   }
 
   /**
    * Call "callable" n times
    * @param n Number of time to call callable
-   * @param callable Callable to be called. Callable function must return Promise<any>.
+   * @param callable Callable to be called.
    * @returns Promise<void>
    */
-  private async _repeat(n: number, callable: Function): Promise<void> {
+  private async _repeat(n: number, callable: () => Promise<unknown>): Promise<void> {
     await this.#instancePromise;
-    if (n < 0) { return; }
+    if (n < 0) {
+      return;
+    }
 
     const sleep = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
     await callable();
     for (let i = 0; i < n - 1; i++) {
-        await sleep(this.#config.signalDelay);
-        await callable();
+      await sleep(this.#config.signalDelay);
+      await callable();
     }
   }
 
@@ -135,7 +149,7 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
    */
   getServices(): Service[] {
     return [
-      this.#lightbulbService
+      this.#lightbulbService,
     ];
   }
 
@@ -153,10 +167,12 @@ class NatureRemoMultiToggleLightAccessory implements AccessoryPlugin {
     await waitUntil(() => !this.#transition);
 
     // Already correct state, do nothing
-    if (this.#state == value) { return; }
+    if (this.#state === value) {
+      return;
+    }
 
     this.#transition = true;
-    let toggleCount: number = this.#state ? this.#config.offToggleCount : this.#config.onToggleCount;
+    const toggleCount: number = this.#state ? this.#config.offToggleCount : this.#config.onToggleCount;
     const toggleClosure = async () => await this._requestToggle();
     await this._repeat(toggleCount, toggleClosure);
     this.#state = value;

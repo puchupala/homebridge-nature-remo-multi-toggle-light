@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "Homebridge Nature Remo Multi Toggle Light",
   "name": "@puchupala/homebridge-nature-remo-multi-toggle-light",
   "version": "1.0.0",
@@ -27,6 +27,7 @@
     "homebridge-plugin"
   ],
   "dependencies": {
+    "@types/node-persist": "^3.1.1",
     "async-wait-until": "^2.0.7",
     "axios": "^0.21.1",
     "node-persist": "^3.1.0"
