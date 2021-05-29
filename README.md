@@ -10,6 +10,26 @@ To avoid the issue, please connect all of your assistants (e.g. Google Assistant
 
 I tested the plugin with Nature Remo 3 but it should supports any model so long as they use the same [Nature Remo Cloud API](https://developer.nature.global/en/overview).
 
-IMPORTANT: The light must be added to Nature Remo as "Other" appliance. Native "Light" appliance is not (yet) supported.
+## Features
+
+* ON/OFF light state
+* Configurable toggle count for switching light state
+* Configurable delay between each toggling
+* Dummy brightness, hue, color temperature, and satuaration settings
+
+## Config
+
+![Homebridge_E481](https://user-images.githubusercontent.com/22722/120080546-7278ba80-c0f4-11eb-9fa8-dd1da32e92b5.png)
+
+## Installation
+
+Just search for "Nature Remo" from the plugin tab of Homebridge web interface.
+You can also install the plugin via the command-line.
+
+```$ npm install @puchupala/homebridge-nature-remo-multi-togglelight -g```
+
+## Important Note
+
+The light must be added to Nature Remo as "Other" appliance. Native "Light" appliance is not (yet) supported.
 
 ![20210528_180311000_iOS_resized](https://user-images.githubusercontent.com/22722/120071555-f027d080-c0ca-11eb-86cc-f88216c109c0.png)
