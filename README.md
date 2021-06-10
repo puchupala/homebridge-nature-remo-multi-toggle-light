@@ -1,5 +1,7 @@
 # Homebridge Nature Remo Multi Toggle Light
 
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+
 This plugin enables Homebridge to control toggle light through [Nature Remo](https://en.nature.global/) IR blaster.
 
 Many ceiling lights in Japan use a single button to toggle between multiple states (e.g. On/Nightlight/Off).
